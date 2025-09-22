@@ -22,7 +22,7 @@ public class SearchController {
     }
 
     @GetMapping("/search")
-    public ResponseDTO<?> searchProducts(
+    public SearchResponse searchProducts(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer status,
@@ -36,29 +36,16 @@ public class SearchController {
                 name, category, status, quantity, page, size);
 
         try {
-            // Build SearchRequest from query params
-            SearchRequest request = new SearchRequest();
-            request.setName(name);
-            request.setCategory(category);
-            request.setStatus(status);
-            request.setQuantity(quantity);
-            request.setPage(page);
-            request.setSize(size);
 
             // Call service
-            SearchResponse searchResponse = searchService.searchProducts(request);
+            SearchResponse searchResponse = searchService.searchProducts(name,category,status,quantity,page,size);
 
             response.setStatus(HttpServletResponse.SC_OK);
-            return ResponseDTO.okList(
-                    searchResponse.getProducts(),
-                    searchResponse.getMeta().getTotalRecord(),
-                    searchResponse.getMeta().getTotalPages(),
-                    searchResponse.getMeta().getCurrentPage()
-            );
+            return searchResponse;
         } catch (Exception e) {
             logger.error("Error while searching products", e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return ResponseDTO.error("500", "Internal Server Error");
+            return null; //should pass error
         } finally {
             long endTime = System.currentTimeMillis();
             logger.info("END | Search Products Controller | TOTAL_RESPONSE_TIME_MS = {}", (endTime - startTime));

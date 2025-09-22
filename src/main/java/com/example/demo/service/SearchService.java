@@ -28,26 +28,14 @@ public class SearchService {
         this.productRepository = productRepository;
     }
 
-    public SearchResponse searchProducts(SearchRequest searchRequest) {
-        long startTime = System.currentTimeMillis();
-        logger.info("START | Search Products - filters: name={}, category={}, status={}, quantity={}, page={}, size={}", 
-                     searchRequest.getName(), 
-                     searchRequest.getCategory(), 
-                     searchRequest.getStatus(), 
-                     searchRequest.getQuantity(), 
-                     searchRequest.getPage(), 
-                     searchRequest.getSize());
+    public SearchResponse searchProducts(String name, String category, Integer status, Integer quantity, int page, int size) {
+        long startTime = System.currentTimeMillis();       
 
         SearchResponse response = new SearchResponse();
+        
         try {
-            Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
-            Page<Product> productPage = productRepository.searchProducts(
-                    searchRequest.getName(),
-                    searchRequest.getCategory(),
-                    searchRequest.getStatus(),
-                    searchRequest.getQuantity(),
-                    pageable
-            );
+            Pageable pageable = PageRequest.of(page,size);
+            Page<Product> productPage = productRepository.searchProducts(name,category,status,quantity,pageable );
             if (productPage.getContent() == null) {
 				ErrorBean error = new ErrorBean();
 				error.setErrorCode(500);
@@ -56,7 +44,7 @@ public class SearchService {
 				return response;
 			}
             List<SearchRequestBean> bean = dataSet(productPage.getContent());
-            response.setProducts(productPage.getContent());
+            response.setProducts(bean);
 
             SearchResponse.Meta meta = new SearchResponse.Meta();
             meta.setTotalRecord((int) productPage.getTotalElements());
@@ -67,8 +55,6 @@ public class SearchService {
 
         } catch (Exception e) {
             logger.error("ERROR | Search Products failed - {}", e.getMessage(), e);
-
-            
         }
 
         long endTime = System.currentTimeMillis();
@@ -95,4 +81,5 @@ public class SearchService {
 		
 		return bean;
 	}
+
 }
