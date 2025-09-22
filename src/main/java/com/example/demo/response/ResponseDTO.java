@@ -28,7 +28,7 @@ public class ResponseDTO<T> {
     // Error response
     public static <T> ResponseDTO<T> error(String message, String code) {
         ResponseDTO<T> response = new ResponseDTO<>();
-        response.setError(new ErrorBean(code, message));
+        response.setError(new ErrorBean());
         return response;
         
     }

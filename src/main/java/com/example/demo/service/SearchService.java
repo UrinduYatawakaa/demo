@@ -4,7 +4,12 @@ import com.example.demo.entity.Product;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.request.SearchRequest;
 import com.example.demo.bean.ErrorBean;
+import com.example.demo.bean.SearchRequestBean;
 import com.example.demo.response.SearchResponse;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -43,7 +48,14 @@ public class SearchService {
                     searchRequest.getQuantity(),
                     pageable
             );
-
+            if (productPage.getContent() == null) {
+				ErrorBean error = new ErrorBean();
+				error.setErrorCode(500);
+				error.setErrorMessage("Failed to search products: ");
+				response.setError(error);
+				return response;
+			}
+            List<SearchRequestBean> bean = dataSet(productPage.getContent());
             response.setProducts(productPage.getContent());
 
             SearchResponse.Meta meta = new SearchResponse.Meta();
@@ -52,12 +64,6 @@ public class SearchService {
             meta.setCurrentPage(productPage.getNumber());
             response.setMeta(meta);
             
-            if(productPage.getContent() == null) {
-	            ErrorBean error = new ErrorBean();
-	            error.setErrorCode(500);
-	            error.setErrorMessage("Failed to search products: ");
-	            response.setError(error);
-            }
 
         } catch (Exception e) {
             logger.error("ERROR | Search Products failed - {}", e.getMessage(), e);
@@ -69,4 +75,24 @@ public class SearchService {
         logger.info("END | Search Products | TOTAL_RESPONSE_TIME_MILSEC - {}", (endTime - startTime));
         return response;
     }
+
+	private List<SearchRequestBean> dataSet(List<Product> content) {
+		List<SearchRequestBean> docList = new ArrayList<>();
+		content.stream().forEach(doc -> {
+			SearchRequestBean documentSearchBean = mapToDocBean(doc);
+			docList.add(documentSearchBean);
+		});
+		return docList;
+	}
+	
+	private SearchRequestBean mapToDocBean(Product product) {
+		SearchRequestBean bean = new SearchRequestBean();
+		bean.setName(product.getName());
+		bean.setCategory(product.getCategory().getName());
+		bean.setQuantity(product.getQuantity());
+		bean.setPrice(product.getPrice());
+		bean.setStatus(product.getStatus());
+		
+		return bean;
+	}
 }

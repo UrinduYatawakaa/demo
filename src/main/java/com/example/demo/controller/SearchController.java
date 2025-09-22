@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 import com.example.demo.request.SearchRequest;
-import com.example.demo.bean.ErrorBean;
 import com.example.demo.response.ResponseDTO;
 import com.example.demo.response.SearchResponse;
 import com.example.demo.service.SearchService;
@@ -22,22 +21,35 @@ public class SearchController {
         this.searchService = searchService;
     }
 
-    //change to get , change body to param
-    @PostMapping("/search")
+    @GetMapping("/search")
     public ResponseDTO<?> searchProducts(
-            @RequestBody SearchRequest request,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Integer quantity,
+            @RequestParam(required = true, defaultValue = "0") int page,
+            @RequestParam(required = true, defaultValue = "10") int size,
             HttpServletResponse response) {
 
         long startTime = System.currentTimeMillis();
-        logger.info("START | Search Products Controller | filters: {}", request);
+        logger.info("START | Search Products Controller | filters: name={}, category={}, status={}, quantity={}, page={}, size={}",
+                name, category, status, quantity, page, size);
 
         try {
-            // Call service with SearchRequest bean
+            // Build SearchRequest from query params
+            SearchRequest request = new SearchRequest();
+            request.setName(name);
+            request.setCategory(category);
+            request.setStatus(status);
+            request.setQuantity(quantity);
+            request.setPage(page);
+            request.setSize(size);
+
+            // Call service
             SearchResponse searchResponse = searchService.searchProducts(request);
 
             response.setStatus(HttpServletResponse.SC_OK);
             return ResponseDTO.okList(
-            		//wena wenama return kranna epa 
                     searchResponse.getProducts(),
                     searchResponse.getMeta().getTotalRecord(),
                     searchResponse.getMeta().getTotalPages(),
@@ -46,12 +58,10 @@ public class SearchController {
         } catch (Exception e) {
             logger.error("Error while searching products", e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-
-           
+            return ResponseDTO.error("500", "Internal Server Error");
         } finally {
             long endTime = System.currentTimeMillis();
             logger.info("END | Search Products Controller | TOTAL_RESPONSE_TIME_MS = {}", (endTime - startTime));
         }
-		return null;
     }
 }
