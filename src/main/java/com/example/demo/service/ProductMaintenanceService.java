@@ -23,8 +23,8 @@ public class ProductMaintenanceService {
     /**
      * Runs every midnight (00:00) to deactivate products with zero quantity.
      */
-//    @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(cron = "*/5 * * * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
+//    @Scheduled(cron = "*/5 * * * * ?")
     public void deactivateOutOfStockProducts() {
         logger.info("START | Running scheduled job: deactivate out-of-stock products");
 
