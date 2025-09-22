@@ -17,6 +17,10 @@ public interface ProductRepository {
     void deleteById(Long id);
 
     List<Product> findByStatus(Integer status);
+    
+    List<Product> findByQuantity(int quantity);
 
     Page<Product> searchProducts(String name, String categoryName, Integer status, Integer quantity, Pageable pageable);
+
+	void saveAll(List<Product> outOfStockProducts);
 }

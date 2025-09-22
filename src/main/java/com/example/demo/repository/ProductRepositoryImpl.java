@@ -45,4 +45,17 @@ public class ProductRepositoryImpl implements ProductRepository {
     public Page<Product> searchProducts(String name, String categoryName, Integer status, Integer quantity, Pageable pageable) {
         return productCrudRepository.searchProducts(name, categoryName, status, quantity, pageable);
     }
+
+    @Override
+    public List<Product> findByQuantity(int quantity) {
+        // Using derived query from Crud repo (needs to be declared in Crud interface)
+        return productCrudRepository.findByQuantity(quantity);
+    }
+
+    @Override
+    public void saveAll(List<Product> products) {
+        productCrudRepository.saveAll(products);
+    }
+		
+	
 }
